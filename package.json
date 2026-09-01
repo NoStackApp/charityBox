@@ -4,13 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "build": "bash -c 'next build'",
+    "start": "bash -c 'next start'",
     "db:up": "docker compose up -d",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "donate": "tsx scripts/donate.ts",
-    "test": "vitest run",
+    "test": "bash -c 'vitest run'",
     "typecheck": "tsc --noEmit",
     "check": "bash -c 'tsc --noEmit'"
   },

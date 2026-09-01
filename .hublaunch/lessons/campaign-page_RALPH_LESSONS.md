@@ -41,6 +41,20 @@ seed idempotency.
   trailing flags should use the same `bash -c '...'` wrapper if it doesn't
   itself accept/ignore unknown args.
 
+## Same bug hit `build` script (2026-09-01)
+- Harness runs `pnpm build -- --concurrency=2`. With `"build": "next build"`,
+  pnpm appended the trailing args so Next actually received
+  `next build -- --concurrency=2`. Next's CLI parses the first positional arg
+  as the project directory, so it tried to resolve `/workspace/--concurrency=2`
+  and failed with "Invalid project directory provided".
+- Fix: same `bash -c` wrapper as `check`: `"build": "bash -c 'next build'"`.
+  Verified both `pnpm build` and `pnpm build -- --concurrency=2` succeed
+  (Turbopack build, 4 static/dynamic routes, TS check passes).
+- Proactively wrapped `test` and `start` the same way (`bash -c 'vitest run'`,
+  `bash -c 'next start'`) since the harness pattern of appending
+  `-- --concurrency=2` isn't specific to one script — assume it can hit any
+  script and wrap defensively instead of waiting for each to fail individually.
+
 ## Verification commands
 - npm run typecheck ; npm run test ; npm run build
 - Restart postgres after reboot: `sudo pg_ctlcluster 14 main start`
