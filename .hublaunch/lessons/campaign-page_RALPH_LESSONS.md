@@ -30,5 +30,8 @@ seed idempotency.
 ## Verification commands
 - npm run typecheck ; npm run test ; npm run build
 - Restart postgres after reboot: `sudo pg_ctlcluster 14 main start`
+- `pnpm check` requires a `check` script in package.json — this repo only had `typecheck`.
+  No ESLint is configured in this project (no eslint config/dep), so `check` == `tsc --noEmit`.
+  Added `"check": "tsc --noEmit"` to scripts. If ESLint is added later, chain it into `check` too.
 
 ## Files: all new project files committed (see git log). .env is git-ignored (never committed).

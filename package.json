@@ -11,7 +11,8 @@
     "db:seed": "prisma db seed",
     "donate": "tsx scripts/donate.ts",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check": "tsc --noEmit"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
