@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { formatMoney } from "../src/lib/money";
 
 const prisma = new PrismaClient();
 
@@ -35,9 +36,10 @@ async function main() {
   });
 
   console.log(
-    `Seeded campaign "${campaign.slug}" (id=${campaign.id}) — goal $${(
-      campaign.goalMinor / 100
-    ).toLocaleString("en-US")}, deadline ${campaign.deadline.toISOString()}`,
+    `Seeded campaign "${campaign.slug}" (id=${campaign.id}) — goal ${formatMoney(
+      campaign.goalMinor,
+      campaign.currency,
+    )}, deadline ${campaign.deadline.toISOString()}`,
   );
 }
 
