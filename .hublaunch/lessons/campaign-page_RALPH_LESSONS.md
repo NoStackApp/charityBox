@@ -27,6 +27,20 @@ seed idempotency.
   Vitest 4. Scaffolded via create-next-app in /tmp then copied into /workspace.
 - dotenv added as devDep so `tsx scripts/donate.ts` loads .env.
 
+## TS5023 'Unknown compiler option --' fix (2026-09-01)
+- Harness invokes `pnpm check -- --concurrency=2`. pnpm forwards trailing args by
+  literally appending them to the script's command line, so `"check": "tsc --noEmit"`
+  became `tsc --noEmit -- --concurrency=2` at runtime — tsc doesn't understand `--`
+  or `--concurrency`, hence TS5023 x2. No source files were involved; it's a
+  package.json script bug, not a real type error.
+- Fix: wrap the real command in `bash -c '...'` so pnpm's appended trailing args land
+  as bash -c's own $0/$1 (ignored) instead of being appended to tsc's argv:
+  `"check": "bash -c 'tsc --noEmit'"`. Verified both `pnpm check` and
+  `pnpm check -- --concurrency=2` exit 0 after the change.
+- Any future script (test, build, etc.) that the harness invokes with extra
+  trailing flags should use the same `bash -c '...'` wrapper if it doesn't
+  itself accept/ignore unknown args.
+
 ## Verification commands
 - npm run typecheck ; npm run test ; npm run build
 - Restart postgres after reboot: `sudo pg_ctlcluster 14 main start`

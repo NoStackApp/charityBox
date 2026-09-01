@@ -12,7 +12,7 @@
     "donate": "tsx scripts/donate.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "check": "tsc --noEmit"
+    "check": "bash -c 'tsc --noEmit'"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
