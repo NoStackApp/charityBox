@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: charitybox
+      POSTGRES_PASSWORD: charitybox
+      POSTGRES_DB: charitybox
+    ports:
+      - "5432:5432"
+    volumes:
+      - charitybox_pgdata:/var/lib/postgresql/data
+
+volumes:
+  charitybox_pgdata:
