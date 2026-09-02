@@ -15,6 +15,9 @@ lays it out):
   streaming route handlers, first-class on Vercel.
 - **tRPC v11** — end-to-end typesafe API (`campaign.snapshot` powers the polling
   fallback); the SSE transport stays a plain route handler.
+- **Clerk** — authentication (`clerkMiddleware` in `src/proxy.ts`, modal sign-in/up in
+  the header, hosted pages at `/sign-in` and `/sign-up`, and a tRPC
+  `protectedProcedure` for future authenticated routers). No routes are gated yet.
 - **Prisma + PostgreSQL** — SQLite cannot persist on Vercel's ephemeral filesystem, so
   Postgres is used everywhere (Docker locally, Neon / Vercel Postgres in production).
 - **@t3-oss/env-nextjs + Zod** — env vars are validated at build/boot in `src/env.js`.
@@ -110,10 +113,13 @@ curl -X POST localhost:3000/api/dev/donate \
 
 ## Environment variables
 
-| Variable               | Required | Description                                                                                          |
-| ---------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`         | Yes      | Postgres connection string. Local: the docker-compose instance. Prod: a Neon / Vercel Postgres URL.  |
-| `ALLOW_FAKE_DONATIONS` | No       | Set to the exact string `"true"` to enable `POST /api/dev/donate`. Anything else (or unset) → 404.   |
+| Variable                            | Required | Description                                                                                          |
+| ----------------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                      | Yes      | Postgres connection string. Local: the docker-compose instance. Prod: a Neon / Vercel Postgres URL.  |
+| `ALLOW_FAKE_DONATIONS`              | No       | Set to the exact string `"true"` to enable `POST /api/dev/donate`. Anything else (or unset) → 404.   |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Yes      | Clerk publishable key (dashboard.clerk.com → API keys).                                              |
+| `CLERK_SECRET_KEY`                  | Yes      | Clerk secret key. Server-side only — never exposed to the client.                                    |
+| `NEXT_PUBLIC_CLERK_SIGN_IN_URL` etc.| No       | Clerk page/redirect URLs; default to `/sign-in`, `/sign-up`, and `/`.                                |
 
 Env vars are validated by `src/env.js` (`@t3-oss/env-nextjs`) — a missing or malformed
 `DATABASE_URL` fails the build instead of failing at runtime. Set `SKIP_ENV_VALIDATION=1`
