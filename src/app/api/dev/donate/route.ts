@@ -1,15 +1,16 @@
 import { NextResponse } from "next/server";
+import { env } from "~/env";
 import {
   createDonation,
   CampaignNotFoundError,
   InvalidDonationError,
-} from "@/lib/donations";
-import { getSnapshot } from "@/lib/campaignStats";
+} from "~/server/donations";
+import { getSnapshot } from "~/server/campaignStats";
 import {
   DEFAULT_SLUG,
   randomAmountMinor,
   randomDonorName,
-} from "@/lib/donationDefaults";
+} from "~/lib/donationDefaults";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,7 +26,7 @@ export const dynamic = "force-dynamic";
  * CLI (random amount + name). Returns { ok, donation, snapshot }.
  */
 export async function POST(request: Request) {
-  if (process.env.ALLOW_FAKE_DONATIONS !== "true") {
+  if (env.ALLOW_FAKE_DONATIONS !== "true") {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

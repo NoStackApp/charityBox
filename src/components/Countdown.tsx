@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { computeRemaining, formatDeadline, type Remaining } from "@/lib/countdown";
+import { computeRemaining, formatDeadline, type Remaining } from "~/lib/countdown";
 
 interface CountdownProps {
   /** Deadline as an ISO 8601 string (absolute UTC instant). */

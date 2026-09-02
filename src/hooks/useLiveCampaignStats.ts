@@ -1,38 +1,25 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { CampaignSnapshot } from "@/lib/campaignStats";
+
+import { api } from "~/trpc/react";
+import { applySnapshot } from "~/hooks/applySnapshot";
+import type { CampaignSnapshot } from "~/server/campaignStats";
 
 export type ConnectionState = "sse" | "polling";
 
 const POLL_INTERVAL_MS = 5_000;
 
-/**
- * The monotonicity reducer — the core of the "never moves backwards" guarantee.
- *
- * Returns `next` ONLY if its sequence number is strictly greater than the one already
- * applied; otherwise it returns `prev` unchanged. This is what makes an out-of-order
- * snapshot (e.g. a slow polling response computed before, but delivered after, a
- * newer SSE event) harmless: it is simply discarded. Pure and side-effect free so it
- * can be unit-tested directly.
- *
- * @param prev the highest snapshot applied so far
- * @param next an incoming snapshot from SSE or polling
- */
-export function applySnapshot(
-  prev: CampaignSnapshot,
-  next: CampaignSnapshot,
-): CampaignSnapshot {
-  return next.seq > prev.seq ? next : prev;
-}
+export { applySnapshot };
 
 /**
  * Subscribes to a campaign's live stats.
  *
  * Transport state machine:
  *  - Primary: an EventSource on `/api/campaigns/[slug]/stream`.
- *  - Fallback: on EventSource `error`, poll `/api/campaigns/[slug]/snapshot` every 5s
- *    while the EventSource keeps trying to reconnect. Polling stops on the next `open`.
+ *  - Fallback: on EventSource `error`, poll the `campaign.snapshot` tRPC query every
+ *    5s while the EventSource keeps trying to reconnect. Polling stops on the next
+ *    `open`.
  *  - Every incoming snapshot (SSE or poll) goes through {@link applySnapshot}, so the
  *    exposed total is strictly non-decreasing regardless of delivery order.
  *
@@ -43,6 +30,7 @@ export function applySnapshot(
 export function useLiveCampaignStats(slug: string, initial: CampaignSnapshot) {
   const [snapshot, setSnapshot] = useState<CampaignSnapshot>(initial);
   const [connection, setConnection] = useState<ConnectionState>("sse");
+  const utils = api.useUtils();
 
   // Ref mirror of the latest applied snapshot so the polling loop can compare seq
   // without being re-created on every update.
@@ -71,17 +59,18 @@ export function useLiveCampaignStats(slug: string, initial: CampaignSnapshot) {
       if (pollTimer !== null || closed) return;
       const poll = async () => {
         try {
-          const res = await fetch(`/api/campaigns/${slug}/snapshot`, {
-            cache: "no-store",
-          });
-          if (!res.ok) return;
-          const data = (await res.json()) as CampaignSnapshot;
+          // staleTime: 0 forces a real network fetch each tick — the polling
+          // fallback must never be satisfied from the query cache.
+          const data = await utils.campaign.snapshot.fetch(
+            { slug },
+            { staleTime: 0 },
+          );
           if (!closed) apply(data);
         } catch {
           // Network error during fallback — try again next interval.
         }
       };
-      pollTimer = setInterval(poll, POLL_INTERVAL_MS);
+      pollTimer = setInterval(() => void poll(), POLL_INTERVAL_MS);
       void poll(); // fire immediately so the fallback catches up fast
     };
 
@@ -97,7 +86,7 @@ export function useLiveCampaignStats(slug: string, initial: CampaignSnapshot) {
     es.addEventListener("message", (event) => {
       if (closed) return;
       try {
-        const data = JSON.parse(event.data) as CampaignSnapshot;
+        const data = JSON.parse(event.data as string) as CampaignSnapshot;
         apply(data);
       } catch {
         // Ignore malformed frame.
@@ -116,6 +105,7 @@ export function useLiveCampaignStats(slug: string, initial: CampaignSnapshot) {
       stopPolling();
       es.close();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   return {

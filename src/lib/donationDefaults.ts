@@ -31,5 +31,6 @@ export function randomAmountMinor(): number {
 
 /** A random donor display name from the built-in demo list. */
 export function randomDonorName(): string {
-  return RANDOM_NAMES[Math.floor(Math.random() * RANDOM_NAMES.length)];
+  // The index is always in range; the fallback only satisfies noUncheckedIndexedAccess.
+  return RANDOM_NAMES[Math.floor(Math.random() * RANDOM_NAMES.length)] ?? "Anonymous";
 }

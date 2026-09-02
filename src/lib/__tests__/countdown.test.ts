@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeRemaining } from "@/lib/countdown";
+import { computeRemaining } from "~/lib/countdown";
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;

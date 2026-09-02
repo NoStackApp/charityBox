@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { db } from "~/server/db";
 
 /**
  * An absolute snapshot of a campaign's live totals.
@@ -38,7 +38,7 @@ interface SnapshotRow {
 export async function getSnapshot(
   slug: string,
 ): Promise<CampaignSnapshot | null> {
-  const rows = await prisma.$queryRaw<SnapshotRow[]>`
+  const rows = await db.$queryRaw<SnapshotRow[]>`
     SELECT c."version" AS seq,
            COALESCE(SUM(d."amountMinor"), 0)::bigint AS "totalMinor",
            COUNT(d.id)::bigint AS "donorCount"

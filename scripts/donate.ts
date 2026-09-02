@@ -13,15 +13,15 @@ import {
   createDonation,
   CampaignNotFoundError,
   InvalidDonationError,
-} from "../src/lib/donations";
-import { getSnapshot } from "../src/lib/campaignStats";
+} from "../src/server/donations";
+import { getSnapshot } from "../src/server/campaignStats";
 import { formatMoney } from "../src/lib/money";
 import {
   DEFAULT_SLUG,
   randomAmountMinor,
   randomDonorName,
 } from "../src/lib/donationDefaults";
-import { prisma } from "../src/lib/db";
+import { db } from "../src/server/db";
 
 interface ParsedArgs {
   slug: string;
@@ -106,10 +106,10 @@ async function main() {
 
 main()
   .then(async () => {
-    await prisma.$disconnect();
+    await db.$disconnect();
   })
   .catch(async (err) => {
-    await prisma.$disconnect();
+    await db.$disconnect();
     if (err instanceof CampaignNotFoundError || err instanceof InvalidDonationError) {
       fail(err.message);
     }

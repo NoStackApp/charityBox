@@ -3,6 +3,7 @@
 // SQLite cannot persist on Vercel's read-only ephemeral filesystem.
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {

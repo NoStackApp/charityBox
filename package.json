@@ -2,27 +2,40 @@
   "name": "charitybox",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "npx prisma generate && npx prisma migrate deploy && bash -c 'next build'",
-    "start": "bash -c 'next start'",
+    "build": "prisma generate && prisma migrate deploy && next build",
     "db:up": "docker compose up -d",
-    "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma migrate dev",
+    "db:migrate": "prisma migrate deploy",
+    "db:push": "prisma db push",
     "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
+    "dev": "next dev",
     "donate": "tsx scripts/donate.ts",
-    "test": "bash -c 'vitest run'",
-    "typecheck": "tsc --noEmit",
-    "check": "bash -c 'tsc --noEmit'"
+    "postinstall": "prisma generate",
+    "preview": "next build && next start",
+    "start": "next start",
+    "test": "vitest run",
+    "check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
+    "@t3-oss/env-nextjs": "^0.12.0",
+    "@tanstack/react-query": "^5.69.0",
+    "@trpc/client": "^11.0.0",
+    "@trpc/react-query": "^11.0.0",
+    "@trpc/server": "^11.0.0",
     "next": "16.3.4",
-    "prisma": "^6.19.3",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1",
+    "superjson": "^2.2.1",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -34,9 +47,14 @@
     "@vitest/coverage-v8": "^4.1.11",
     "dotenv": "^17.4.2",
     "jsdom": "^25.0.1",
+    "postcss": "^8.5.3",
+    "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "tsx": "^4.23.13",
     "typescript": "^5",
     "vitest": "^4.1.11"
+  },
+  "ct3aMetadata": {
+    "initVersion": "7.40.0"
   }
 }

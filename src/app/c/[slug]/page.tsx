@@ -1,8 +1,8 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { getSnapshot } from "@/lib/campaignStats";
-import { LiveCampaignDashboard } from "@/components/LiveCampaignDashboard";
+import { db } from "~/server/db";
+import { getSnapshot } from "~/server/campaignStats";
+import { LiveCampaignDashboard } from "~/components/LiveCampaignDashboard";
 
 // Always render fresh so the server-rendered totals reflect the live DB.
 export const dynamic = "force-dynamic";
@@ -21,7 +21,7 @@ interface PageProps {
 export default async function CampaignPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const campaign = await prisma.campaign.findUnique({ where: { slug } });
+  const campaign = await db.campaign.findUnique({ where: { slug } });
   if (!campaign) {
     notFound();
   }

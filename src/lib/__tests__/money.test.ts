@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatMoney, percentRaised } from "@/lib/money";
+import { formatMoney, percentRaised } from "~/lib/money";
 
 describe("formatMoney", () => {
   it("formats USD cents as a grouped dollar string", () => {

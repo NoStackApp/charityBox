@@ -1,5 +1,8 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import "~/styles/globals.css";
+
+import { type Metadata } from "next";
+
+import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
   title: "charityBox",
@@ -11,7 +14,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <TRPCReactProvider>{children}</TRPCReactProvider>
+      </body>
     </html>
   );
 }

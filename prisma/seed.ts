@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../generated/prisma";
 import { formatMoney } from "../src/lib/money";
 
 const prisma = new PrismaClient();
