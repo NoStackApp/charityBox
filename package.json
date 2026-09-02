@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "bash -c 'prisma generate && next build'",
+    "build": "bash -c 'prisma generate && prisma migrate deploy && next build'",
     "postinstall": "prisma generate",
     "start": "bash -c 'next start'",
     "db:up": "docker compose up -d",

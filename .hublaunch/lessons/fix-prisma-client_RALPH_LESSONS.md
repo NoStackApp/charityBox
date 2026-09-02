@@ -4,8 +4,25 @@ This file persists context across agent sessions. Update it as you work.
 
 ## Current Status
 - Phase: COMPLETE ✅
-- Last action: Fixed missing Prisma client, migrated repo to pnpm, verified end-to-end.
+- Last action: Merged origin/main into fix-prisma-client, resolved package.json conflict, re-verified.
 - Blockers: None
+
+## Merge Conflict Resolution (session 2, 2026-09-02)
+- origin/main had advanced 2 commits ahead of the merge base ("all local changes",
+  "added prisma to build script") while our branch had the pnpm-standardization commit.
+  Merging origin/main produced ONE real conflict: package.json `build` script.
+- The other listed files (README.md, package-lock.json, pnpm-lock.yaml) did NOT conflict:
+  package-lock.json was already git-removed on our side; README/pnpm-lock auto-merged clean.
+- HEAD build: `bash -c 'prisma generate && next build'` + `postinstall: prisma generate`.
+  origin/main build: `npx prisma generate && npx prisma migrate deploy && bash -c 'next build'`.
+  RESOLUTION (combine both intents, standardize on pnpm — drop `npx`):
+  `build`: `bash -c 'prisma generate && prisma migrate deploy && next build'` and KEEP
+  the `postinstall: prisma generate` (the root-cause fix). This preserves origin/main's
+  new `migrate deploy` step while keeping our auto-generate fix and pnpm standardization.
+- Merge also pulled in .agents/skills/*, .claude/settings.json, .hublaunch scaffolding,
+  .vscode/settings.json, .gitignore changes — all additive, no conflicts.
+- Re-verified after merge (via `corepack pnpm@10.30.0`): install+postinstall generate
+  client OK, `tsc --noEmit` exit 0, `pnpm check` exit 0, `pnpm test` 23/23 pass.
 
 ## Key Discoveries
 - Container reality differed from the plan's assumptions: NO node_modules, NO

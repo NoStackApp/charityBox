@@ -43,7 +43,11 @@ yarn-error.log*
 next-env.d.ts
 
 # HubLaunch
-# (.hublaunch/ is tracked tooling — do not ignore)
+# (.hublaunch/ is tracked tooling — do not ignore the directory itself)
+# config holds API keys — never commit
+hublaunch.config.js
+.hula-worktrees/
+.hublaunch/tmp/
 
 # prisma
 /prisma/*.db
