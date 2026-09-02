@@ -1,0 +1,10 @@
+{
+  "chat.tools.terminal.autoApprove": {
+    "/^hula\\b/": true,
+    "/^git (status|log|diff|fetch|show|branch|worktree list|rev-parse|remote)\\b/": true,
+    "/^git (add|commit|push|checkout|worktree add|worktree remove)\\b/": true,
+    "/^gh (issue view|pr list|pr view|pr diff|repo view)\\b/": true,
+    "/^gh pr (comment|merge)\\b/": true,
+    "/^(ls|cat|head|tail|wc|echo|mkdir|rm -f|cd|pwd)\\b/": true
+  }
+}
