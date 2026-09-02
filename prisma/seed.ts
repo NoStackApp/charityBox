@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 const SLUG = "save-the-community-center";
 
 const STORY = [
-  "The Beit Chesed Community Center has been the beating heart of our neighborhood for over forty years. From after-school tutoring and senior lunches to holiday celebrations and a food pantry that never turns anyone away, its doors have stayed open through every season.",
+  "The Riverside Community Center has been the beating heart of our neighborhood for over forty years. From after-school tutoring and senior lunches to holiday celebrations and a food pantry that never turns anyone away, its doors have stayed open through every season.",
   "This winter a burst pipe flooded the main hall and kitchen, and the repairs the building needs go far beyond what our reserves can cover. Without urgent help, the programs that thousands of families rely on will go dark for the first time in a generation.",
   "For the next 24 hours we are coming together to save it. Every dollar you give restores a wall, a stove, a chair in the classroom — and keeps this home for our community alive. Please, be part of bringing it back.",
 ].join("\n\n");
@@ -19,12 +19,16 @@ async function main() {
   const campaign = await prisma.campaign.upsert({
     where: { slug: SLUG },
     update: {
-      // Refresh the deadline on re-seed so the demo countdown is always ~24h out.
+      // Refresh the deadline on re-seed so the demo countdown is always ~24h out,
+      // and keep the sample copy in sync with this file.
       deadline,
+      orgName: "Riverside Community Center",
+      title: "Save the Community Center",
+      story: STORY,
     },
     create: {
       slug: SLUG,
-      orgName: "Beit Chesed Community Center",
+      orgName: "Riverside Community Center",
       title: "Save the Community Center",
       story: STORY,
       heroImagePath: "/images/hero-sample.svg",

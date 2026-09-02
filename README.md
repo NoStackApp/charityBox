@@ -76,7 +76,7 @@ In a second terminal, insert fake donations (no payment processing exists yet):
 
 ```bash
 pnpm donate                              # random $10–$500 donation, random name
-pnpm donate --amount 180 --name "Sarah"
+pnpm donate --amount 50 --name "Sarah"
 pnpm donate --amount 36 --anonymous
 pnpm donate --amount 120000              # push past the goal (bar caps, label > 100%)
 ```
@@ -88,7 +88,7 @@ You can also drive the dev-only HTTP endpoint (enabled by `ALLOW_FAKE_DONATIONS`
 ```bash
 curl -X POST localhost:3000/api/dev/donate \
   -H 'content-type: application/json' \
-  -d '{"slug":"save-the-community-center","amountMinor":18000,"donorName":"Chai Donor"}'
+  -d '{"slug":"save-the-community-center","amountMinor":5000,"donorName":"Sample Donor"}'
 # → { "ok": true, "donation": {...}, "snapshot": { "seq": N, "totalMinor": N, "donorCount": N } }
 ```
 
