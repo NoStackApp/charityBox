@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "bash -c 'next build'",
+    "build": "bash -c 'prisma generate && next build'",
+    "postinstall": "prisma generate",
     "start": "bash -c 'next start'",
     "db:up": "docker compose up -d",
     "db:migrate": "prisma migrate dev",
@@ -16,6 +17,10 @@
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
+  },
+  "packageManager": "pnpm@10.30.0",
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/client", "@prisma/engines", "prisma"]
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

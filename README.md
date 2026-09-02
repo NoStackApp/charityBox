@@ -34,42 +34,50 @@ donation lands — via Server-Sent Events, with HTTP polling as a fallback — a
 ## Prerequisites
 
 - **Node.js 20+**
+- **pnpm** (this repo pins `pnpm@10.30.0` via the `packageManager` field; run
+  `corepack enable` to have the right version selected automatically).
 - **Docker** (for the local Postgres container) — or any reachable PostgreSQL 14+
-  instance, in which case set `DATABASE_URL` to point at it and skip `npm run db:up`.
+  instance, in which case set `DATABASE_URL` to point at it and skip `pnpm db:up`.
 
 ## Local setup
 
 ```bash
-# 1. Install dependencies
-npm install
+# 1. Install dependencies (auto-generates the Prisma client via the postinstall script)
+pnpm install
 
 # 2. Configure environment
 cp .env.example .env         # adjust DATABASE_URL if not using the docker default
 
 # 3. Start Postgres (docker-compose)
-npm run db:up
+pnpm db:up
 
 # 4. Create the schema and seed the sample campaign
-npm run db:migrate           # applies migrations (prisma migrate dev)
-npm run db:seed              # idempotent upsert of the sample campaign
+pnpm db:migrate              # applies migrations (prisma migrate dev)
+pnpm db:seed                 # idempotent upsert of the sample campaign
 
 # 5. Run the app
-npm run dev                  # → http://localhost:3000
+pnpm dev                     # → http://localhost:3000
 ```
+
+> `pnpm install` runs `prisma generate` automatically (via the `postinstall` script),
+> so the schema-specific Prisma client is always present. If you ever need to
+> regenerate it by hand, run `pnpm prisma generate`.
 
 Then open **http://localhost:3000/c/save-the-community-center**.
 
 > Not using Docker? Point `DATABASE_URL` at any Postgres 14+ database and run steps 4–5.
+
+> Prefer npm? This repo standardizes on **pnpm** (the lockfile is `pnpm-lock.yaml`).
 
 ## Watch the thermometer move
 
 In a second terminal, insert fake donations (no payment processing exists yet):
 
 ```bash
-npm run donate                              # random $10–$500 donation, random name
-npm run donate -- --amount 180 --name "Sarah"
-npm run donate -- --amount 36 --anonymous
-npm run donate -- --amount 120000           # push past the goal (bar caps, label > 100%)
+pnpm donate                                 # random $10–$500 donation, random name
+pnpm donate --amount 180 --name "Sarah"
+pnpm donate --amount 36 --anonymous
+pnpm donate --amount 120000                 # push past the goal (bar caps, label > 100%)
 ```
 
 Each donation appears on any open campaign page within ~2 seconds, with no refresh.
@@ -87,17 +95,17 @@ curl -X POST localhost:3000/api/dev/donate \
 
 ## Scripts
 
-| Script               | Description                                              |
-| -------------------- | -------------------------------------------------------- |
-| `npm run dev`        | Start the Next.js dev server.                            |
-| `npm run build`      | Production build.                                        |
-| `npm run start`      | Start the production server (after `build`).             |
-| `npm run db:up`      | Start the docker-compose Postgres container.             |
-| `npm run db:migrate` | Apply Prisma migrations (`prisma migrate dev`).          |
-| `npm run db:seed`    | Seed / re-seed the sample campaign (idempotent).         |
-| `npm run donate`     | Insert a fake donation (see flags above).                |
-| `npm run test`       | Run the Vitest unit tests.                               |
-| `npm run typecheck`  | Type-check with `tsc --noEmit`.                          |
+| Script            | Description                                              |
+| ----------------- | -------------------------------------------------------- |
+| `pnpm dev`        | Start the Next.js dev server.                            |
+| `pnpm build`      | Production build (runs `prisma generate` first).         |
+| `pnpm start`      | Start the production server (after `build`).             |
+| `pnpm db:up`      | Start the docker-compose Postgres container.             |
+| `pnpm db:migrate` | Apply Prisma migrations (`prisma migrate dev`).          |
+| `pnpm db:seed`    | Seed / re-seed the sample campaign (idempotent).         |
+| `pnpm donate`     | Insert a fake donation (see flags above).                |
+| `pnpm test`       | Run the Vitest unit tests.                               |
+| `pnpm typecheck`  | Type-check with `tsc --noEmit`.                          |
 
 ## Environment variables
 
@@ -113,7 +121,7 @@ only `.env.example` is tracked.
 
 1. Provision a **Neon** or **Vercel Postgres** database and copy its pooled connection
    string into the Vercel project's `DATABASE_URL` environment variable.
-2. Run migrations against that database (e.g. `DATABASE_URL=… npx prisma migrate deploy`).
+2. Run migrations against that database (e.g. `DATABASE_URL=… pnpm prisma migrate deploy`).
 3. Optionally set `ALLOW_FAKE_DONATIONS="true"` to demo live donations via the dev
    endpoint. Leave it unset in a real deployment.
 4. **SSE under function duration caps**: each stream self-closes at ~55s (under Vercel's
@@ -124,7 +132,7 @@ only `.env.example` is tracked.
 ## Testing
 
 ```bash
-npm run test
+pnpm test
 ```
 
 Unit tests cover the core invariants: the `applySnapshot` monotonicity reducer
