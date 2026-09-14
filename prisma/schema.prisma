@@ -1,14 +1,14 @@
 // Prisma schema for charityBox.
 // Postgres is used everywhere (dev via Docker Compose, prod via Neon/Vercel Postgres);
 // SQLite cannot persist on Vercel's read-only ephemeral filesystem.
+// The connection URL is configured in prisma.config.ts (Prisma 7), not here.
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
   output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 /// A fundraising campaign. `version` is the per-campaign sequence counter that is

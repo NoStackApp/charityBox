@@ -1,7 +1,13 @@
-import { PrismaClient } from "../generated/prisma";
+import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "../generated/prisma/client";
 import { formatMoney } from "../src/lib/money";
 
-const prisma = new PrismaClient();
+// Prisma 7: the CLI no longer injects DATABASE_URL into the seed process, and
+// PrismaClient needs an explicit driver adapter.
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
+});
 
 const SLUG = "save-the-community-center";
 

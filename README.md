@@ -20,6 +20,7 @@ lays it out):
   `protectedProcedure` for future authenticated routers). No routes are gated yet.
 - **Prisma + PostgreSQL** — SQLite cannot persist on Vercel's ephemeral filesystem, so
   Postgres is used everywhere (Docker locally, Neon / Vercel Postgres in production).
+  Prisma 7 with the `@prisma/adapter-pg` driver adapter.
 - **@t3-oss/env-nextjs + Zod** — env vars are validated at build/boot in `src/env.js`.
 - **Tailwind CSS v4** — styling.
 - **Vitest** — unit tests for the core invariants.
@@ -65,6 +66,10 @@ pnpm db:seed                 # idempotent upsert of the sample campaign
 # 5. Run the app
 pnpm dev                     # → http://localhost:3000
 ```
+
+Prisma's CLI configuration (schema path, migrations path, seed command, and the
+`DATABASE_URL` datasource) lives in `prisma.config.ts` at the repo root; `.env` is loaded
+there via `dotenv`.
 
 Then open **http://localhost:3000/c/save-the-community-center**.
 
@@ -115,7 +120,7 @@ curl -X POST localhost:3000/api/dev/donate \
 
 | Variable                            | Required | Description                                                                                          |
 | ----------------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`                      | Yes      | Postgres connection string. Local: the docker-compose instance. Prod: a Neon / Vercel Postgres URL.  |
+| `DATABASE_URL`                      | Yes      | Postgres connection string. Local: the docker-compose instance. Prod: a Neon / Vercel Postgres URL. Read by `src/env.js` at runtime and by `prisma.config.ts` for CLI commands.  |
 | `ALLOW_FAKE_DONATIONS`              | No       | Set to the exact string `"true"` to enable `POST /api/dev/donate`. Anything else (or unset) → 404.   |
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Yes      | Clerk publishable key (dashboard.clerk.com → API keys).                                              |
 | `CLERK_SECRET_KEY`                  | Yes      | Clerk secret key. Server-side only — never exposed to the client.                                    |
@@ -154,6 +159,7 @@ countdown remaining-time math, and donation amount validation.
 ## Project structure
 
 ```
+prisma.config.ts           # Prisma 7 CLI config: datasource URL, migrations path, seed
 prisma/
   schema.prisma            # Campaign + Donation models; version = seq counter
   seed.ts                  # idempotent sample-campaign upsert
@@ -171,7 +177,7 @@ src/
     api/campaigns/[slug]/stream/route.ts    # SSE (DB-polling, serverless-safe)
     api/dev/donate/route.ts                 # dev-only fake donation endpoint
   server/
-    db.ts                  # PrismaClient singleton
+    db.ts                  # PrismaClient singleton (pg driver adapter)
     campaignStats.ts       # consistent snapshot query (single SQL statement)
     donations.ts           # shared createDonation write path
     api/                   # tRPC root, context/procedures, routers/campaign

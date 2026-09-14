@@ -17,6 +17,9 @@ npm run db:migrate    # prisma migrate dev (apply migrations)
 npm run db:seed       # idempotent sample campaign
 ```
 
+Prisma 7: CLI commands read `DATABASE_URL` through `prisma.config.ts` (which loads `.env`
+via dotenv); `npm install` runs `prisma generate` and does not need the database.
+
 ## Verification
 
 <!-- RALPH_CHECK_COMMANDS
