@@ -264,7 +264,11 @@ prisma/seed.ts   ──▶ new PrismaPg({ connectionString: process.env.DATABASE
   pnpm install
   ```
   Expected: `postinstall` runs `prisma generate` successfully and `generated/prisma/client.ts` exists. If `pnpm install` was run with `--ignore-scripts` earlier, run `pnpm prisma generate` explicitly.
-- [ ] Prove generate works with no env: `env -u DATABASE_URL pnpm prisma generate` must exit 0.
+- [ ] Prove generate works with no env. `prisma.config.ts` imports `dotenv/config`, so simply unsetting the variable is not enough while a `.env` file exists; move the file aside for the check and restore it afterwards:
+  ```bash
+  mv .env .env.bak; env -u DATABASE_URL pnpm prisma generate; echo "generate exit=$?"; mv .env.bak .env
+  ```
+  Expected: exit status 0 and `generated/prisma/client.ts` regenerated.
 
 ### Phase 4: Verification
 
@@ -298,7 +302,7 @@ prisma/seed.ts   ──▶ new PrismaPg({ connectionString: process.env.DATABASE
 
 #### Edge Cases to Handle
 
-1. **`DATABASE_URL` unset during install**: `prisma generate` must succeed (config uses `process.env`, `datasource.url` is optional in Prisma's types). Verified by the `env -u DATABASE_URL pnpm prisma generate` step.
+1. **`DATABASE_URL` unset during install**: `prisma generate` must succeed (config uses `process.env`, `datasource.url` is optional in Prisma's types). Verified by the no-`.env` generate check in Phase 3 (move `.env` aside, run `pnpm prisma generate`, restore `.env`).
 2. **`DATABASE_URL` unset during `migrate deploy` (e.g. misconfigured Vercel project)**: Prisma prints its own missing-datasource error and the build fails, which is the desired signal.
 3. **`?schema=public` in `DATABASE_URL`**: node-postgres ignores unknown query parameters and Prisma's pg adapter defaults to the `public` schema, so the existing connection string works unchanged. Do not pass a `schema` option to `PrismaPg`.
 4. **Raw-query numeric types**: `getSnapshot` already normalises with `Number()`; the type widening to `bigint | string` keeps `tsc` honest without changing runtime behaviour.
@@ -359,7 +363,7 @@ prisma/seed.ts   ──▶ new PrismaPg({ connectionString: process.env.DATABASE
 #### Manual Testing Checklist
 
 1. **Setup**: `cp .env.example .env` (fill Clerk keys), `pnpm db:up`, `pnpm install`.
-2. **Generate without env**: `env -u DATABASE_URL pnpm prisma generate` — Expected: exit 0.
+2. **Generate without env**: `mv .env .env.bak; env -u DATABASE_URL pnpm prisma generate; mv .env.bak .env` — Expected: the generate step exits 0 (the `.env` file must be moved aside because `prisma.config.ts` loads it via `dotenv/config`).
 3. **Migrate + seed**: `pnpm db:generate` then `pnpm db:seed` — Expected: no new migration folder; seed prints the campaign summary.
 4. **App**: `pnpm dev`, open `/c/save-the-community-center` — Expected: page renders with the thermometer; `pnpm donate --amount 25` in another terminal moves it within ~2s.
 5. **Dev endpoint**: with `ALLOW_FAKE_DONATIONS="true"`, `curl -X POST localhost:3000/api/dev/donate -H 'content-type: application/json' -d '{"slug":"save-the-community-center","amountMinor":500}'` — Expected: 200 and a new total.
@@ -401,7 +405,7 @@ pnpm db:seed
 - [ ] **AC1**: `package.json` lists `@prisma/client` and `@prisma/adapter-pg` at `^7.10.0` in `dependencies` and `prisma` at `^7.10.0` in `devDependencies`; `pnpm ls prisma` resolves to a 7.10.x version.
 - [ ] **AC2**: `package.json` has no top-level `prisma` key; `db:generate` is `prisma migrate dev && prisma generate`; all other scripts are unchanged.
 - [ ] **AC3**: `prisma.config.ts` exists at the repo root with the content specified in Phase 2, and `prisma/schema.prisma` uses `provider = "prisma-client"` with no `url` in the datasource block; models are unchanged.
-- [ ] **AC4**: `env -u DATABASE_URL pnpm prisma generate` exits 0.
+- [ ] **AC4**: With `.env` moved aside and `DATABASE_URL` unset, `pnpm prisma generate` exits 0 (the Phase 3 no-`.env` check).
 - [ ] **AC5**: `src/server/db.ts` and `prisma/seed.ts` construct `PrismaClient` with a `PrismaPg` adapter and import from `generated/prisma/client`.
 - [ ] **AC6**: `pnpm check`, `pnpm test`, and `pnpm build` (with the dev database running) all pass.
 - [ ] **AC7**: `pnpm prisma migrate status` shows no pending migrations and `pnpm db:generate` creates no new migration directory.
