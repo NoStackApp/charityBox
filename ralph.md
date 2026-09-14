@@ -13,8 +13,8 @@ Install dependencies and prepare the DB:
 
 ```bash
 npm install
-npm run db:migrate    # prisma migrate dev (apply migrations)
-npm run db:seed       # idempotent sample campaign
+pnpm db:generate      # prisma migrate dev && prisma generate
+pnpm db:seed          # idempotent sample campaign
 ```
 
 ## Verification

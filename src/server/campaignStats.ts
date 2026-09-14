@@ -14,12 +14,13 @@ export interface CampaignSnapshot {
   donorCount: number;
 }
 
-// Raw row shape returned by the joined query. Postgres SUM(bigint) and COUNT come
-// back as bigint via node-postgres, which Prisma surfaces as JS bigint.
+// Raw row shape returned by the joined query. Postgres SUM(bigint) and COUNT may be
+// surfaced as bigint or string depending on the driver adapter; every field is
+// normalised with Number() below.
 interface SnapshotRow {
   seq: number;
-  totalMinor: bigint;
-  donorCount: bigint;
+  totalMinor: bigint | string;
+  donorCount: bigint | string;
 }
 
 /**

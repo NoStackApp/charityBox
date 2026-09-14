@@ -1,8 +1,11 @@
+import { PrismaPg } from "@prisma/adapter-pg";
 import { env } from "~/env";
-import { PrismaClient } from "../../generated/prisma";
+import { PrismaClient } from "../../generated/prisma/client";
 
+// Prisma 7 requires a driver adapter; PrismaPg wraps a node-postgres Pool.
 const createPrismaClient = () =>
   new PrismaClient({
+    adapter: new PrismaPg({ connectionString: env.DATABASE_URL }),
     log:
       env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });

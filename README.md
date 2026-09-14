@@ -50,6 +50,8 @@ lays it out):
 
 ```bash
 # 1. Install dependencies (also runs `prisma generate` via postinstall)
+#    Prisma CLI settings (schema path, migrations, seed command, DATABASE_URL)
+#    live in prisma.config.ts.
 pnpm install
 
 # 2. Configure environment
@@ -59,7 +61,7 @@ cp .env.example .env         # adjust DATABASE_URL if not using the docker defau
 pnpm db:up
 
 # 4. Create the schema and seed the sample campaign
-pnpm db:generate             # applies migrations (prisma migrate dev)
+pnpm db:generate             # applies migrations and regenerates the client (prisma migrate dev && prisma generate)
 pnpm db:seed                 # idempotent upsert of the sample campaign
 
 # 5. Run the app
@@ -102,7 +104,7 @@ curl -X POST localhost:3000/api/dev/donate \
 | `pnpm build`       | Production build (`prisma generate && migrate deploy && next build`). |
 | `pnpm start`       | Start the production server (after `build`).                   |
 | `pnpm db:up`       | Start the docker-compose Postgres container.                   |
-| `pnpm db:generate` | Apply Prisma migrations in dev (`prisma migrate dev`).         |
+| `pnpm db:generate` | Apply Prisma migrations in dev and regenerate the client (`prisma migrate dev && prisma generate`). |
 | `pnpm db:migrate`  | Deploy Prisma migrations (`prisma migrate deploy`).            |
 | `pnpm db:push`     | Push the schema without a migration (`prisma db push`).        |
 | `pnpm db:studio`   | Open Prisma Studio.                                            |
@@ -154,10 +156,11 @@ countdown remaining-time math, and donation amount validation.
 ## Project structure
 
 ```
+prisma.config.ts           # Prisma 7 CLI config (schema/migrations/seed/DATABASE_URL)
 prisma/
   schema.prisma            # Campaign + Donation models; version = seq counter
   seed.ts                  # idempotent sample-campaign upsert
-generated/prisma/          # generated Prisma client (git-ignored)
+generated/prisma/          # generated Prisma 7 client (git-ignored; entry generated/prisma/client.ts)
 scripts/
   donate.ts                # demo CLI (uses the shared createDonation write path)
 public/images/

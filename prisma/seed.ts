@@ -1,7 +1,13 @@
-import { PrismaClient } from "../generated/prisma";
+import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "../generated/prisma/client";
 import { formatMoney } from "../src/lib/money";
 
-const prisma = new PrismaClient();
+// Self-contained client (does not import src/server/db.ts) so seeding needs only
+// DATABASE_URL, not the Clerk variables validated by src/env.js.
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
+});
 
 const SLUG = "save-the-community-center";
 
