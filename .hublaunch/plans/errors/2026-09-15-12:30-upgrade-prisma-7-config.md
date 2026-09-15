@@ -147,8 +147,8 @@ The VS Code Prisma extension reports an error on `prisma/schema.prisma` line 11 
 **Pattern References:**
 
 - **For the client singleton**: keep the structure in [`src/server/db.ts`](src/server/db.ts) lines 4-16 (a `createPrismaClient` factory, a `globalForPrisma` cache, and the `NODE_ENV !== "production"` guard). Only the import path and the `adapter` option change.
-- **For loading `.env` in a standalone script**: follow [`scripts/donate.ts`](scripts/donate.ts) line 12 (`import "dotenv/config";` as the first import). Apply the same line to `prisma/seed.ts`.
-- **For the seed's lifecycle**: keep the `main().then(disconnect).catch(log, disconnect, exit 1)` shape in [`prisma/seed.ts`](prisma/seed.ts) lines 51-59 unchanged.
+- **For loading `.env` in a standalone script**: follow [`scripts/donate.ts`](scripts/donate.ts) line 11 (`import "dotenv/config";` as the first import). Apply the same line to `prisma/seed.ts`.
+- **For the seed's lifecycle**: keep the `main().then(disconnect).catch(log, disconnect, exit 1)` shape in [`prisma/seed.ts`](prisma/seed.ts) lines 50-58 unchanged.
 - **For unit tests**: follow the plain `describe`/`it`/`expect` style in [`src/server/__tests__/donations.test.ts`](src/server/__tests__/donations.test.ts) lines 1-10 (Vitest globals are enabled in `vitest.config.mts`, but the existing files import from `vitest` explicitly; do the same).
 
 **Anti-Patterns to Avoid:**
