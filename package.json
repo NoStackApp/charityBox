@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@10.28.0",
   "scripts": {
     "build": "prisma generate && prisma migrate deploy && next build",
     "db:up": "docker compose up -d",
-    "db:generate": "prisma migrate dev",
+    "db:generate": "prisma migrate dev && prisma generate",
     "db:migrate": "prisma migrate deploy",
-    "db:push": "prisma db push",
+    "db:push": "prisma db push && prisma generate",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "dev": "next dev",
@@ -20,12 +21,10 @@
     "check": "tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "dependencies": {
     "@clerk/nextjs": "^7.8.4",
-    "@prisma/client": "^6.19.3",
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
     "@t3-oss/env-nextjs": "^0.12.0",
     "@tanstack/react-query": "^5.69.0",
     "@trpc/client": "^11.0.0",
@@ -49,7 +48,7 @@
     "dotenv": "^17.4.2",
     "jsdom": "^25.0.1",
     "postcss": "^8.5.3",
-    "prisma": "^6.19.3",
+    "prisma": "7.10.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.13",
     "typescript": "^5",

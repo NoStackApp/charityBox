@@ -20,6 +20,7 @@ lays it out):
   `protectedProcedure` for future authenticated routers). No routes are gated yet.
 - **Prisma + PostgreSQL** — SQLite cannot persist on Vercel's ephemeral filesystem, so
   Postgres is used everywhere (Docker locally, Neon / Vercel Postgres in production).
+  Prisma 7 with the `@prisma/adapter-pg` driver adapter.
 - **@t3-oss/env-nextjs + Zod** — env vars are validated at build/boot in `src/env.js`.
 - **Tailwind CSS v4** — styling.
 - **Vitest** — unit tests for the core invariants.
@@ -42,9 +43,9 @@ lays it out):
 
 ## Prerequisites
 
-- **Node.js 20+**
+- **Node.js 20.19+** (Prisma 7 minimum; 22+ recommended)
 - **Docker** (for the local Postgres container) — or any reachable PostgreSQL 14+
-  instance, in which case set `DATABASE_URL` to point at it and skip `npm run db:up`.
+  instance, in which case set `DATABASE_URL` to point at it and skip `pnpm db:up`.
 
 ## Local setup
 
@@ -54,12 +55,13 @@ pnpm install
 
 # 2. Configure environment
 cp .env.example .env         # adjust DATABASE_URL if not using the docker default
+#    Prisma CLI settings (schema, migrations, seed command, DATABASE_URL) live in prisma.config.ts.
 
 # 3. Start Postgres (docker-compose)
 pnpm db:up
 
 # 4. Create the schema and seed the sample campaign
-pnpm db:generate             # applies migrations (prisma migrate dev)
+pnpm db:generate             # applies migrations and regenerates the client (prisma migrate dev && prisma generate)
 pnpm db:seed                 # idempotent upsert of the sample campaign
 
 # 5. Run the app
@@ -102,9 +104,9 @@ curl -X POST localhost:3000/api/dev/donate \
 | `pnpm build`       | Production build (`prisma generate && migrate deploy && next build`). |
 | `pnpm start`       | Start the production server (after `build`).                   |
 | `pnpm db:up`       | Start the docker-compose Postgres container.                   |
-| `pnpm db:generate` | Apply Prisma migrations in dev (`prisma migrate dev`).         |
+| `pnpm db:generate` | Apply Prisma migrations in dev and regenerate the client (`prisma migrate dev && prisma generate`). |
 | `pnpm db:migrate`  | Deploy Prisma migrations (`prisma migrate deploy`).            |
-| `pnpm db:push`     | Push the schema without a migration (`prisma db push`).        |
+| `pnpm db:push`     | Push the schema without a migration and regenerate the client (`prisma db push && prisma generate`). |
 | `pnpm db:studio`   | Open Prisma Studio.                                            |
 | `pnpm db:seed`     | Seed / re-seed the sample campaign (idempotent).               |
 | `pnpm donate`      | Insert a fake donation (see flags above).                      |
@@ -115,7 +117,7 @@ curl -X POST localhost:3000/api/dev/donate \
 
 | Variable                            | Required | Description                                                                                          |
 | ----------------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`                      | Yes      | Postgres connection string. Local: the docker-compose instance. Prod: a Neon / Vercel Postgres URL.  |
+| `DATABASE_URL`                      | Yes      | Postgres connection string. Local: the docker-compose instance. Prod: a Neon / Vercel Postgres URL. Read by `src/env.js` at runtime and by `prisma.config.ts` for CLI commands.  |
 | `ALLOW_FAKE_DONATIONS`              | No       | Set to the exact string `"true"` to enable `POST /api/dev/donate`. Anything else (or unset) → 404.   |
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Yes      | Clerk publishable key (dashboard.clerk.com → API keys).                                              |
 | `CLERK_SECRET_KEY`                  | Yes      | Clerk secret key. Server-side only — never exposed to the client.                                    |
@@ -130,6 +132,8 @@ only `.env.example` is tracked.
 
 ## Deploying to Vercel
 
+The Vercel project must define `DATABASE_URL` and both Clerk keys in every environment that builds (Production and Preview); `prisma migrate deploy` runs during `pnpm build`.
+
 1. Provision a **Neon** or **Vercel Postgres** database and copy its pooled connection
    string into the Vercel project's `DATABASE_URL` environment variable.
 2. Run migrations against that database (e.g. `DATABASE_URL=… npx prisma migrate deploy`).
@@ -143,7 +147,7 @@ only `.env.example` is tracked.
 ## Testing
 
 ```bash
-npm run test
+pnpm test
 ```
 
 Unit tests cover the core invariants: the `applySnapshot` monotonicity reducer
@@ -154,10 +158,11 @@ countdown remaining-time math, and donation amount validation.
 ## Project structure
 
 ```
+prisma.config.ts           # Prisma 7 CLI config: datasource URL, migrations path, seed
 prisma/
   schema.prisma            # Campaign + Donation models; version = seq counter
   seed.ts                  # idempotent sample-campaign upsert
-generated/prisma/          # generated Prisma client (git-ignored)
+generated/prisma/          # generated Prisma 7 client (git-ignored; entry point generated/prisma/client.ts)
 scripts/
   donate.ts                # demo CLI (uses the shared createDonation write path)
 public/images/
@@ -171,7 +176,7 @@ src/
     api/campaigns/[slug]/stream/route.ts    # SSE (DB-polling, serverless-safe)
     api/dev/donate/route.ts                 # dev-only fake donation endpoint
   server/
-    db.ts                  # PrismaClient singleton
+    db.ts                  # PrismaClient singleton (pg driver adapter)
     campaignStats.ts       # consistent snapshot query (single SQL statement)
     donations.ts           # shared createDonation write path
     api/                   # tRPC root, context/procedures, routers/campaign

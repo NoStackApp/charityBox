@@ -12,10 +12,12 @@ Postgres 14 is installed natively (`sudo apt-get install -y postgresql`); start 
 Install dependencies and prepare the DB:
 
 ```bash
-npm install
-npm run db:migrate    # prisma migrate dev (apply migrations)
-npm run db:seed       # idempotent sample campaign
+pnpm install          # runs prisma generate via postinstall (no DATABASE_URL needed)
+pnpm db:generate      # prisma migrate dev && prisma generate
+pnpm db:seed          # idempotent sample campaign
 ```
+
+Requires pnpm >= 10.26 (the repo pins `pnpm@10.28.0` via `packageManager`); if `pnpm --version` is older, run `npm install -g pnpm@10.28.0`. Prisma 7 reads `DATABASE_URL` through `prisma.config.ts`, which loads `.env` via dotenv.
 
 ## Verification
 
