@@ -4,8 +4,35 @@ This file persists context across agent sessions. Update it as you work.
 
 ## Current Status
 - Phase: COMPLETE ✅
-- Last action: Merged origin/main into fix-prisma-client, resolved package.json conflict, re-verified.
+- Last action: Re-merged advanced origin/main (Prisma 7 upgrade) into fix-prisma-client,
+  resolved package.json + README.md conflicts, re-verified, pushed (commit 7ae66af).
 - Blockers: None
+
+## Merge Conflict Resolution (session 3, 2026-10-22)
+- GitHub still reported conflicts because origin/main had advanced 4 more commits
+  past our last merge base (abda6d6): "Convert to T3 Stack conventions", "Add Clerk
+  authentication", "Make sample campaign nondenominational", and the PR #11 "Upgrade
+  to Prisma 7 (prisma.config.ts + pg driver adapter)". Our branch was 2 commits ahead
+  of that base; needed a fresh `git fetch` + `git merge origin/main`.
+- KEY INSIGHT: origin/main had ALREADY adopted this branch's root-cause fix —
+  `"postinstall": "prisma generate"` is present in origin/main's package.json. So our
+  branch is effectively superseded; the Prisma 7 upgrade also dropped the old
+  `bash -c` build/start/test wrappers and the Prisma 6 deps.
+- Only TWO files conflicted: package.json and README.md.
+  - package.json: our HEAD side had old Prisma 6 bash -c wrappers + a 2nd
+    `packageManager` (pnpm@10.30.0) + a `pnpm.onlyBuiltDependencies` block, which would
+    have produced DUPLICATE keys / stale deps if hand-merged. Resolved with
+    `git checkout --theirs package.json` (take origin/main wholesale) — it already has
+    the postinstall fix, pins pnpm@10.28.0, and uses Prisma 7 deps.
+  - README.md (5 conflict hunks): ours described the superseded Prisma 6 / pnpm@10.30.0
+    setup; origin/main's is current (Prisma 7, db:generate/db:push/db:studio scripts,
+    Node 20.19+). Resolved with `git checkout --theirs README.md`.
+- System pnpm (9.x) errors on the new `pnpm-workspace.yaml` ("packages field missing");
+  use `corepack pnpm@10.28.0 <cmd>` (matches the pinned packageManager). Install's
+  postinstall generated the Prisma 7 client to `./generated/prisma` (new location).
+- Re-verified: `corepack pnpm@10.28.0 run typecheck` exit 0; `... run test` 25/25 pass.
+  (Tests grew from 23 → 25 after the T3/Prisma-7 changes.) Pushed 7ae66af; HEAD now
+  contains all of origin/main (`git log HEAD..origin/main` empty).
 
 ## Merge Conflict Resolution (session 2, 2026-09-02)
 - origin/main had advanced 2 commits ahead of the merge base ("all local changes",
