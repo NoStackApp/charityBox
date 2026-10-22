@@ -1,4 +1,4 @@
-import { getSnapshot, type CampaignSnapshot } from "@/lib/campaignStats";
+import { getSnapshot, type CampaignSnapshot } from "~/server/campaignStats";
 
 // Prisma requires the Node runtime (Edge cannot run it). force-dynamic prevents any
 // caching of the stream. maxDuration keeps us under Vercel's function duration cap.

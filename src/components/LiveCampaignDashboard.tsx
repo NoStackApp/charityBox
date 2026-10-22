@@ -1,9 +1,9 @@
 "use client";
 
-import { useLiveCampaignStats } from "@/hooks/useLiveCampaignStats";
-import type { CampaignSnapshot } from "@/lib/campaignStats";
-import { Thermometer } from "@/components/Thermometer";
-import { Countdown } from "@/components/Countdown";
+import { useLiveCampaignStats } from "~/hooks/useLiveCampaignStats";
+import type { CampaignSnapshot } from "~/server/campaignStats";
+import { Thermometer } from "~/components/Thermometer";
+import { Countdown } from "~/components/Countdown";
 
 interface LiveCampaignDashboardProps {
   slug: string;

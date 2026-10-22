@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { assertValidAmount, InvalidDonationError } from "@/lib/donations";
+import { assertValidAmount, InvalidDonationError } from "~/server/donations";
 
 describe("assertValidAmount", () => {
   it("accepts a positive integer number of minor units", () => {

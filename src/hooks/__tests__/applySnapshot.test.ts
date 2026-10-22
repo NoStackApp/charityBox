@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { applySnapshot } from "@/hooks/useLiveCampaignStats";
-import type { CampaignSnapshot } from "@/lib/campaignStats";
+import { applySnapshot } from "~/hooks/applySnapshot";
+import type { CampaignSnapshot } from "~/server/campaignStats";
 
 const snap = (
   seq: number,

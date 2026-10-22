@@ -1,9 +1,9 @@
-import { prisma } from "@/lib/db";
+import { db } from "~/server/db";
 
 /** Thrown when a donation targets a slug that does not exist. */
 export class CampaignNotFoundError extends Error {
   constructor(slug: string) {
-    super(`Campaign "${slug}" not found. Did you run: npm run db:seed?`);
+    super(`Campaign "${slug}" not found. Did you run: pnpm db:seed?`);
     this.name = "CampaignNotFoundError";
   }
 }
@@ -72,7 +72,7 @@ export async function createDonation(input: CreateDonationInput) {
     }
   }
 
-  const campaign = await prisma.campaign.findUnique({
+  const campaign = await db.campaign.findUnique({
     where: { slug },
     select: { id: true },
   });
@@ -80,8 +80,8 @@ export async function createDonation(input: CreateDonationInput) {
     throw new CampaignNotFoundError(slug);
   }
 
-  const [donation] = await prisma.$transaction([
-    prisma.donation.create({
+  const [donation] = await db.$transaction([
+    db.donation.create({
       data: {
         campaignId: campaign.id,
         amountMinor,
@@ -89,7 +89,7 @@ export async function createDonation(input: CreateDonationInput) {
         anonymous,
       },
     }),
-    prisma.campaign.update({
+    db.campaign.update({
       where: { id: campaign.id },
       data: { version: { increment: 1 } },
     }),

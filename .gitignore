@@ -51,3 +51,5 @@ hublaunch.config.js
 
 # prisma
 /prisma/*.db
+# generated prisma client (see prisma/schema.prisma generator output)
+/generated

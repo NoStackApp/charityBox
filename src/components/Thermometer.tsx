@@ -1,6 +1,6 @@
 "use client";
 
-import { formatMoney, percentRaised } from "@/lib/money";
+import { formatMoney, percentRaised } from "~/lib/money";
 
 interface ThermometerProps {
   totalMinor: number;
